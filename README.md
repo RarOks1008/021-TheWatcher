@@ -17,7 +17,7 @@ Email notification of errors.
 
 ## Other remarks
 
-### Hosted
+### Files
 
 - You only need to add the **watcher.json** file in the *bin/Debug* folder
 - **watcher.json** file should be made according to the example given bellow:
