@@ -59,11 +59,17 @@ namespace TheWatcher
                     }
                     catch (Exception ex)
                     {
-                        myExceptionObject.Occurence += 1;
-                        myExceptionObject.Names.Add(urlToCheck.Title);
-                        myExceptionObject.Messages.Add(ex.Message);
-                        myExceptionObject.EResults.Add(urlToCheck.Value);
-                        myExceptionObject.AResults.Add("");
+                        if (urlToCheck.Value == "")
+                        {
+                            Console.WriteLine("Success: " + urlToCheck.Title);
+                        } else
+                        {
+                            myExceptionObject.Occurence += 1;
+                            myExceptionObject.Names.Add(urlToCheck.Title);
+                            myExceptionObject.Messages.Add(ex.Message);
+                            myExceptionObject.EResults.Add(urlToCheck.Value);
+                            myExceptionObject.AResults.Add("");
+                        }
                     }
                 }
                 if (myExceptionObject.Occurence >= 3)
