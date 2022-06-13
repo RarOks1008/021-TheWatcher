@@ -31,14 +31,18 @@ Email notification of errors.
 			"XPath": "FullXPath"
 		}
 	],
+	"EmailSender": {
+		"ToEmail" : "email@email.com",
+		"Email": "email@email.com",
+		"Password": "Pass123"
+	},
 	"CheckDuration": 3600000,
-	"ToEmail" : "email@email.com",
-	"Email": "email@email.com",
-	"Password": "Pass123"
+	"ShouldShowSuccess": false
 }
 ```
 - properties in the json file are:
   - *CheckDuration* - time in milliseconds for when to run the next set of checks. (3600000=1hour)
+  - *EmailSender* - Object which holds data for sending the email.
   - *ToEmail* - email on which to send notification.
   - *Email* and *Password* - email and password for an email from which the notification will be sent.
   - *Urls* - array of urls to check.
@@ -46,3 +50,5 @@ Email notification of errors.
   - *Url* - url to navigate to.
   - *Value* - value expected to get on the element.
   - *XPath* - FullXPath of the element to check.
+  - *ShouldShowSuccess* - boolean value to check if the success values should be written in the console.
+  - *NotificationType* - either console or email to check the type of sending the notification.

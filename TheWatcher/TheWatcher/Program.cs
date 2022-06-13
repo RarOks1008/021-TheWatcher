@@ -47,32 +47,62 @@ namespace TheWatcher
                         browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
                         IWebElement ratingElement = browser.FindElement(By.XPath(urlToCheck.XPath));
                         if (ratingElement != null && ratingElement.Text == urlToCheck.Value)
-                            Console.WriteLine("Success: " + urlToCheck.Title);
-                        else
                         {
-                            myExceptionObject.Messages.Add(urlToCheck.Url);
-                            myExceptionObject.Names.Add(urlToCheck.Title);
-                            myExceptionObject.EResults.Add(urlToCheck.Value);
-                            myExceptionObject.AResults.Add(ratingElement.Text);
-                            whileHandler = false;
+                            if (urlsToCheck.ShouldShowSuccess)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Blue;
+                                Console.WriteLine("Success: " + urlToCheck.Title);
+                                Console.ResetColor();
+                            }
+                        } else
+                        {
+                            if (urlsToCheck.NotificationType == "email")
+                            {
+                                myExceptionObject.Occurence += 1;
+                                myExceptionObject.Messages.Add(urlToCheck.Url);
+                                myExceptionObject.Names.Add(urlToCheck.Title);
+                                myExceptionObject.EResults.Add(urlToCheck.Value);
+                                myExceptionObject.AResults.Add(ratingElement.Text);
+                            }
+                            if (urlsToCheck.NotificationType == "console")
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"\nERROR\n\t Title: {urlToCheck.Title}\n\tResult: {ratingElement.Text}\n\t Expected Result: {urlToCheck.Value}\n\tMessage or URL: {urlToCheck.Url}\n");
+                                Console.ResetColor();
+                            }
+                            
                         }
                     }
                     catch (Exception ex)
                     {
                         if (urlToCheck.Value == "")
                         {
-                            Console.WriteLine("Success: " + urlToCheck.Title);
+                            if (urlsToCheck.ShouldShowSuccess)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Blue;
+                                Console.WriteLine("Success: " + urlToCheck.Title);
+                                Console.ResetColor();
+                            }
                         } else
                         {
-                            myExceptionObject.Occurence += 1;
-                            myExceptionObject.Names.Add(urlToCheck.Title);
-                            myExceptionObject.Messages.Add(ex.Message);
-                            myExceptionObject.EResults.Add(urlToCheck.Value);
-                            myExceptionObject.AResults.Add("");
+                            if (urlsToCheck.NotificationType == "email")
+                            {
+                                myExceptionObject.Occurence += 1;
+                                myExceptionObject.Names.Add(urlToCheck.Title);
+                                myExceptionObject.Messages.Add(ex.Message);
+                                myExceptionObject.EResults.Add(urlToCheck.Value);
+                                myExceptionObject.AResults.Add("");
+                            }
+                            if (urlsToCheck.NotificationType == "console")
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"\nERROR\n\t Title: {urlToCheck.Title}\n\tResult: \n\t Expected Result: {urlToCheck.Value}\n\tMessage or URL: {ex.Message}\n");
+                                Console.ResetColor();
+                            }
                         }
                     }
                 }
-                if (myExceptionObject.Occurence >= 3)
+                if (myExceptionObject.Occurence >= 3 && urlsToCheck.NotificationType == "email")
                 {
                     whileHandler = false;
                 }
@@ -80,9 +110,9 @@ namespace TheWatcher
                     System.Threading.Thread.Sleep(urlsToCheck.CheckDuration);
             }
 
-            var fromAddress = new MailAddress(urlsToCheck.Email, "The Watcher");
-            var toAddress = new MailAddress(urlsToCheck.ToEmail, "Watched Person");
-            string fromPassword = urlsToCheck.Password;
+            var fromAddress = new MailAddress(urlsToCheck.EmailSender.Email, "The Watcher");
+            var toAddress = new MailAddress(urlsToCheck.EmailSender.ToEmail, "Watched Person");
+            string fromPassword = urlsToCheck.EmailSender.Password;
             string subject = "The Watcher Error";
             string body = @"
                 <html lang=""en"">
@@ -150,22 +180,47 @@ namespace TheWatcher
 
     public class UrlsToCheck
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string ToEmail { get; set; }
-        public int CheckDuration { get; set; }
         public List<UrlToCheck> Urls { get; set; }
-        public UrlsToCheck(string email, string password, string toEmail, int checkDuration, List<UrlToCheck> urlToCheck)
+        public EmailSender EmailSender { get; set; }
+        public int CheckDuration { get; set; }
+        public bool ShouldShowSuccess { get; set; }
+        public string NotificationType { get; set; }
+        public UrlsToCheck(int checkDuration, List<UrlToCheck> urlToCheck, EmailSender emailSender, bool shouldShowSuccess, string notificationType)
         {
-            ToEmail = toEmail;
-            CheckDuration = checkDuration;
             Urls = urlToCheck;
-            Email = email;
-            Password = password;
-        }
+            EmailSender = new EmailSender(emailSender);
+            CheckDuration = checkDuration;
+            ShouldShowSuccess = shouldShowSuccess;
+            NotificationType = notificationType;
+         }
         public UrlsToCheck()
         {
             Urls = new List<UrlToCheck>();
+        }
+    }
+
+    public class EmailSender
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string ToEmail { get; set; }
+        public EmailSender(EmailSender emailSender)
+        {
+            Email = emailSender.Email;
+            Password = emailSender.Password;
+            ToEmail = emailSender.ToEmail;
+        }
+        public EmailSender(string email, string password, string toEmail)
+        {
+            Email = email;
+            Password = password;
+            ToEmail = toEmail;
+        }
+        public EmailSender()
+        {
+            Email = "";
+            Password = "";
+            ToEmail = "";
         }
     }
 
