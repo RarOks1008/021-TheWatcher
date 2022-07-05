@@ -42,6 +42,10 @@ namespace TheWatcher
                 {
                     try
                     {
+                        if (urlToCheck.Url == "" || urlToCheck.Title == "" || urlToCheck.XPath == "")
+                        {
+                            throw new Exception("Wrong parameters for url added");
+                        }
                         if (browser.Url != urlToCheck.Url)
                             browser.Navigate().GoToUrl(urlToCheck.Url);
                         browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
